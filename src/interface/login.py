@@ -6,7 +6,6 @@ from playwright.async_api import BrowserContext, Page
 
 from src.crawler.login import make_login
 from src.interface.logo import LogoTitle
-from src.types import Status
 
 
 class LoginFrame(ttk.Frame):

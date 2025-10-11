@@ -8,13 +8,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def is_logged_in(page: Page, set_user_status: Callable[[bool], None]) -> None:
-    try:
-        await page.goto("/")
-        await page.wait_for_url("**/eproc/controlador.php**", timeout=5000)
-        set_user_status(True)
-    except TimeoutError:
-        set_user_status(False)
+async def get_my_locators(page: Page, set_locator_list: Callable[[str], None]) -> None:
+    await page.get_by_role("link", name="localizadores").click()
+    await page.get_by_role("link", name="Meus localizadores").click()
+    locators = []
+    for locator in await page.locator(".infraTable .infraTrClara").all():
+        text = await locator.inner_text()
+        link = await locator.locator("a").get_attribute("href")
+        locators.append(f"{text}||{link}")
+    set_locator_list("|||".join(locators))
 
 
 async def make_login(username: str, password: str, otp_code: str, page: Page, context: BrowserContext, set_user_status: Callable[[bool], None]) -> None:

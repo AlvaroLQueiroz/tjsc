@@ -3,7 +3,7 @@ from async_tkinter_loop import async_handler
 from playwright.async_api import async_playwright, Playwright, Browser, BrowserContext, Page
 
 from src.constants import DOMAIN, DATA_PATH
-from src.crawler import locator
+from src.crawler.locator import get_my_locators
 from src.crawler.login import is_logged_in
 
 from src.interface.loading import LoadingFrame
@@ -19,6 +19,13 @@ browser: Browser = None
 context: BrowserContext = None
 page: Page = None
 
+PIECES_DOCS_MAPS = {
+    "Apelação": ["APE"],
+    "Agravo de Instrumento": ["INIC"],
+    "Contra-razões": ["CONTRAZAP"],
+    "Parecer do Ministério Público": ["PROMOÇÃO"],
+}
+available_locators = {}
 
 loading_frame: LoadingFrame = None
 login_frame: LoginFrame = None
@@ -31,15 +38,23 @@ def start_application():
     global login_frame
     global locator_list
 
+    # Initial states
     is_user_logged_in = tk.BooleanVar(value=False)
     is_navigator_ready = tk.BooleanVar(value=False)
     locator_list = tk.StringVar(value="")
 
+    # Frames
     loading_frame = LoadingFrame(app, text="Validando sessão...")
-    loading_frame.pack(fill="both", expand=True)
+    login_frame = LoginFrame(app, page=page, context=context)
+
+    # Event listeners
     is_navigator_ready.trace_add("write", check_login_status)
     is_user_logged_in.trace_add("write", update_login)
+    locator_list.trace_add("write", show_locators)
+    login_frame.bind("<<LoginSuccess>>", get_user_locators)
 
+    # Starting point
+    loading_frame.pack(fill="both", expand=True)
     async_handler(start_navigator)()
 
 
@@ -73,28 +88,45 @@ async def stop_navigator():
 
 
 def check_login_status(*args):
-    async_handler(is_logged_in)(page, is_user_logged_in.set)
-
+    # async_handler(is_logged_in)(page, is_user_logged_in.set)
+    is_user_logged_in.set(True)  # For testing purposes only
 
 def update_login(*args):
     loading_frame.pack_forget()
     if is_user_logged_in.get() is True:
-        select_parameters(app)
+        get_user_locators(app)
     else:
-        login_frame = LoginFrame(app, page=page, context=context)
-        login_frame.bind("<<LoginSuccess>>", select_parameters)
         login_frame.pack(fill="both", expand=True)
 
 
-def select_parameters(*args):
+def get_user_locators(*args):
     loading_frame.set_text("Aguarde...")
     loading_frame.pack(pady=20)
-    async_handler(locator.get_my_locators)(page, locator_list.set)
-    def show_locators(*args):
-        loading_frame.pack_forget()
-        locator_frame = SelectParametersFrame(app, locators=locator_list.get())
-        locator_frame.pack(fill="both", expand=True)
-    locator_list.trace_add("write", show_locators)
+    # async_handler(get_my_locators)(page, locator_list.set)
+    locator_list.set("|||".join(["Locator 1||http://example.com/1", "Locator 2||http://example.com/2"]))  # For testing purposes only
+
+
+def show_locators(*args):
+    global locator_frame
+
+    loading_frame.pack_forget()
+    for locator in locator_list.get().split("|||"):
+        text, link = locator.split("||")
+        available_locators[text] = link
+    locator_frame = SelectParametersFrame(
+        app,
+        locators=list(available_locators.keys()),
+        pieces=list(PIECES_DOCS_MAPS.keys())
+    )
+    locator_frame.bind("<<ParametersSelected>>", show)
+    locator_frame.pack(fill="both", expand=True)
+
+def show(e):
+    print("Selected parameters:")
+    print("Locator:", locator_frame.selected_locator.get())
+    print("Piece:", locator_frame.selected_piece.get())
+    print("Key words:", locator_frame.selected_key_words.get())
+    locator_frame.pack_forget()
 
 
 class App(tk.Tk):
