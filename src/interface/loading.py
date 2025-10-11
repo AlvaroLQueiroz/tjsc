@@ -9,7 +9,7 @@ LoadingMode = Literal["determinate", "indeterminate"]
 
 
 class LoadingFrame(ttk.Frame):
-    def __init__(self, parent, mode: LoadingMode = "indeterminate", maximum: int = 100, *args, **kwargs):
+    def __init__(self, parent, text: str, mode: LoadingMode = "indeterminate", maximum: int = 100, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.mode = mode
 
@@ -25,6 +25,9 @@ class LoadingFrame(ttk.Frame):
             self.updated_label = ttk.Label(self, textvariable=self.percentage)
             self.updated_label.pack(pady=5)
 
+        self.label = ttk.Label(self, text=text)
+        self.label.pack(pady=5)
+
         self.loader.start()
 
     def update_progress(self):
@@ -34,3 +37,6 @@ class LoadingFrame(ttk.Frame):
             total = self.loader["maximum"]
             percent = int((current / total) * 100) if total > 0 else 0
             self.percentage.set(f"{percent}%")
+
+    def set_text(self, text: str):
+        self.label["text"] = text

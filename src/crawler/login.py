@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 async def is_logged_in(page: Page, set_user_status: Callable[[bool], None]) -> None:
     try:
         await page.goto("/")
-        await page.wait_for_url("**/app/home**", timeout=5000)
+        await page.wait_for_url("**/eproc/controlador.php**", timeout=5000)
         set_user_status(True)
     except TimeoutError:
         set_user_status(False)

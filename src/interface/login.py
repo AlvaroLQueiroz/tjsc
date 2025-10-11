@@ -10,10 +10,10 @@ from src.types import Status
 
 
 class LoginFrame(ttk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, page, context):
         super().__init__(parent)
-        self.page: Page = parent.page
-        self.context: BrowserContext = parent.context
+        self.page: Page = page
+        self.context: BrowserContext = context
 
         self.username = tk.StringVar()
         self.password = tk.StringVar()
