@@ -7,3 +7,8 @@ wheels/
 *.egg-info
 .DS_Store
 .venv
+data/converted/
+data/*secret*
+*.pdf
+*.xls*
+.env
