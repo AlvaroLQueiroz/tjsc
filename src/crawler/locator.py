@@ -21,7 +21,8 @@ async def go_to_locators_page(page: Page) -> None:
 
 
 async def get_my_locators(page: Page, set_locator: Callable[[dict], None]) -> None:
-    await go_to_locators_page(page)
+    # await go_to_locators_page(page)
+    await page.get_by_role("button", name="Meus localizadores").click()
     locators = {}
     for locator in await page.locator(".infraTable .infraTrClara").all():
         text = await locator.inner_text()

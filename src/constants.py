@@ -16,8 +16,16 @@ NAVIGATION_TIMEOUT = 2000 # millisec
 ACTION_TIMEOUT = 3000 # millisec
 
 DOMAIN = "https://eproc2g.tjsc.jus.br"
-EPROC_HOME = "/eproc/index.php"
+EPROC_PROFILE_SELECTOR = "eproc/externo_controlador.php?acao=entrar_sso"
+EPROC_HOME = "/"
 EPROC_CONTROLADOR = "/eproc/controlador.php"
 
 
-EPROC_PROFILE = "emanuelamaral / MAGISTRADO / GCIV0801"
+EPROC_PROFILE = "GCIV0801"
+
+PIECES_DOCS_MAPS = {
+    "Apelação": ["APE"],
+    "Agravo de Instrumento": ["INIC"],
+    "Contra-razões": ["CONTRAZAP"],
+    "Parecer do Ministério Público": ["PROMOÇÃO"],
+}
