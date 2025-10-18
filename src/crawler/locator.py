@@ -10,22 +10,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-async def go_to_locators_page(page: Page) -> None:
-    try:
-        await page.goto(EPROC_HOME)
-        await page.get_by_role("link", name="localizadores").click()
-        await page.get_by_role("link", name="Meus localizadores").click()
-    except TimeoutError:
-        logger.error("Could not navigate to locators page")
-        return
-
-
 async def get_my_locators(page: Page, set_locator: Callable[[dict], None]) -> None:
-    # await go_to_locators_page(page)
     await page.get_by_role("button", name="Meus localizadores").click()
+    await page.wait_for_load_state()
     locators = {}
     for locator in await page.locator(".infraTable .infraTrClara").all():
-        text = await locator.inner_text()
-        link = await locator.locator("a").get_attribute("href")
+        anchor = locator.locator("a")
+        text = await anchor.get_attribute("aria-label")
+        link = await anchor.get_attribute("href")
         locators[text] = link
     set_locator(locators)

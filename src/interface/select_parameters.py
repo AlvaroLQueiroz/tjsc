@@ -12,7 +12,7 @@ from src.interface.logo import LogoTitle
 from src.query_language import query
 
 
-class SelectParametersFrame(ttk.Frame):
+class SelectParametersPage(ttk.Frame):
     PIECES_KEYS = list(PIECES_DOCS_MAPS.keys())
 
     def __init__(self, parent: tk.Tk, page: Page, context: BrowserContext):
@@ -104,4 +104,8 @@ class SelectParametersFrame(ttk.Frame):
             self.error_label.pack(pady=5)
             return
 
-        self.event_generate("<<ParametersSelected>>")
+        self.event_generate("<<ParametersSelected>>", data={
+            "locator": locator,
+            "piece": piece,
+            "key_words": key_words})
+        self.destroy()

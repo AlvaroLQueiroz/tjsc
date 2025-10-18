@@ -23,6 +23,7 @@ def get_auth_data() -> tuple[str, str]:
 
 async def select_profile(page: Page) -> None:
     try:
+        await page.wait_for_load_state()
         if await page.get_by_role("heading", name="Seleção de perfil").count():
             logger.info("Selecting profile...")
             await page.get_by_role("button", name=EPROC_PROFILE).click()
@@ -55,6 +56,7 @@ async def is_logged_in(page: Page, set_user_status: Callable[[dict], None]) -> N
         pass
 
     try:
+        await page.wait_for_load_state()
         if await page.get_by_role("textbox", name="Usuário").count():
             logger.info("Not logged in, trying login...")
             username, password = get_auth_data()
@@ -67,7 +69,7 @@ async def is_logged_in(page: Page, set_user_status: Callable[[dict], None]) -> N
         logger.warning("User not logged in: %s", e)
         set_user_status({ "logged_in": False })
         return
-
+    logger.info("User is logged in")
     set_user_status({ "logged_in": True })
 
 
