@@ -24,5 +24,5 @@ class DictVar(StringVar):
     def values(self) -> list[str]:
         return list(self.get().values())
 
-    def items(self) -> list[tuple[str, str]]:
+    def items(self) -> list[tuple[str, Any]]:
         return list(self.get().items())

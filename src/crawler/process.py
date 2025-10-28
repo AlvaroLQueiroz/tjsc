@@ -1,10 +1,11 @@
 import logging
 import re
-from typing import Callable
+from typing import Any, Callable
+from urllib.parse import urlparse, parse_qs
 
 from playwright.async_api import BrowserContext, Page, TimeoutError
 
-from src.constants import DOWNLOADED_PATH, EPROC
+from src.constants import DOMAIN, DOWNLOADED_PATH, EPROC
 from src.interface.loading import LoadingFrame
 
 
@@ -35,7 +36,7 @@ async def get_processes(page: Page, locator: str, loading_frame: LoadingFrame, s
             process_number_col = process.locator("td").nth(1).locator("a").nth(0)
             text = await process_number_col.inner_text()
             link = await process_number_col.get_attribute("href")
-            processes[text] = link
+            processes[text] = {"link": link}
         try:
             await page.get_by_role("link", name="Próxima Página").nth(0).click()
             await page.wait_for_load_state()
@@ -46,42 +47,46 @@ async def get_processes(page: Page, locator: str, loading_frame: LoadingFrame, s
     set_processes(processes)
 
 
-async def download_process_files(context: BrowserContext, page: Page, process: dict[str, str], file_name_pattern: re.Pattern, key_words: str, loading_frame: LoadingFrame) -> None:
-    for process_number, link in process.items():
+def flatten_dict(d: dict[str, list[str]]) -> dict[str, str]:
+    return {k: v[0] for k, v in d.items()}
+
+
+async def download_process_files(page: Page, processes: dict[str, dict[str, Any]], file_name_pattern: re.Pattern, set_processes: Callable[[dict[str, dict[str, Any]]], None], loading_frame: LoadingFrame) -> None:
+
+    for process_number, process in processes.items():
+        if "files" not in process:
+            processes[process_number]["files"] = []
         loading_frame.update_progress()
-        await page.goto(f"{EPROC}{link}")
+        await page.goto(f"{EPROC}{process['link']}")
 
-        path = DOWNLOADED_PATH / process_number.replace("/", "_")
-        path.mkdir(parents=True, exist_ok=True)
+        process_folder = DOWNLOADED_PATH / process_number.replace("/", "_")
+        process_folder.mkdir(parents=True, exist_ok=True)
 
-        files = await page.locator(".infraLinkDocumento").all()
-        logger.info(f"Found {len(files)} files for process {process_number}...")
-        for file_anchor in files:
-            file_name = await file_anchor.inner_text()
-            new_page = context.wait_for_event("page")
-            await file_anchor.click()
-            new_page = await new_page
-            await new_page.wait_for_load_state()
-            await new_page.get_by_role("button", name="Download").click()
-            await new_page.get_by_role("button", name="Download").click()
-            doc_content = await new_page.locator("body").inner_text()
-            print("Nome do Arquivo: ", bool(file_name_pattern.match(file_name)))
-            print("Contem Palavra: ", key_words in doc_content)
-            print("Conteudo: ", len(doc_content))
-            await new_page.screenshot(
-                path=path / f"{file_name}.png",
-                full_page=True,
-                type="png",
-                omit_background=True
-                )
-            await new_page.close()
-            # if file_name_pattern.match(file_name):
+        files_anchors = await page.locator(".infraLinkDocumento").all()
+        logger.info(f"Found {len(files_anchors)} files for process {process_number}...")
+        for file_index, file_anchor in enumerate(files_anchors, 1):
+            file_link = await file_anchor.get_attribute("href")
+            file_name = await file_anchor.inner_text() + f"_{file_index}"
+            if not file_name_pattern.match(file_name):
+                logger.info(f"Skipping file {file_name} as it does not match the pattern.")
+                continue
+            parsed_url = urlparse(file_link or "")
+            url_params = flatten_dict(parse_qs(parsed_url.query))
+            url_params["acao"] = "acessar_documento_implementacao"
+            url_params["acao_origem"] = "acessar_documento"
+            url_params["nome_documento"] = file_name
 
-                # if not file_name_pattern.match(file_name):
-                #     continue
-                # print(file_name)
-                # file_link = await file_anchor.get_attribute("href")
-                # data = {
-                #     "name": file_name,
-                #     "link": file_link
-                # }
+            file_path = process_folder / file_name
+            file_path = file_path.with_suffix(".pdf")
+            response = await page.request.get(f"{DOMAIN}{EPROC}{parsed_url.path}", params=url_params)
+
+            if response.status != 200:
+                logger.error(f"Failed to download file: {file_path}")
+                continue
+
+            with open(file_path, "wb") as f:
+                f.write(await response.body())
+            logger.info(f"Downloaded file: {file_path.with_suffix('.pdf')}")
+            processes[process_number]["files"].append(str(file_path))
+
+    set_processes(processes)

@@ -12,7 +12,7 @@ from src.interface.logo import LogoTitle
 from src.query_language import query
 
 
-class SelectParametersPage(ttk.Frame):
+class ParametersPage(ttk.Frame):
     PIECES_KEYS = list(PIECES_DOCS_MAPS.keys())
 
     def __init__(self, parent: tk.Tk, page: Page, context: BrowserContext):
@@ -81,7 +81,7 @@ class SelectParametersPage(ttk.Frame):
         self.error_label.pack_forget()
         locator = self.selected_locator.get()
         piece = self.selected_piece.get()
-        key_words = self.selected_key_words.get()
+        key_words = self.selected_key_words.get().lower()
         if not locator:
             self.error_label.config(text="Por favor, selecione um localizador.")
             self.error_label.pack(pady=5)
@@ -103,6 +103,8 @@ class SelectParametersPage(ttk.Frame):
             self.error_label.config(text="Palavras-chave inválidas.")
             self.error_label.pack(pady=5)
             return
+
+        key_words = key_words.replace("*", ".*").replace("OU", "|")
 
         self.event_generate("<<ParametersSelected>>", data={
             "locator": locator,
