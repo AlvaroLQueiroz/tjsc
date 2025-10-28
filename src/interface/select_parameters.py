@@ -37,7 +37,9 @@ class ParametersPage(ttk.Frame):
         self.locator_combobox = ttk.Combobox(self, textvariable=self.selected_locator)
 
         self.piece_label = ttk.Label(self, text="Tipo de peça:")
-        self.piece_combobox = ttk.Combobox(self, textvariable=self.selected_piece, values=list(PIECES_DOCS_MAPS.keys()))
+        self.piece_combobox = ttk.Combobox(
+            self, textvariable=self.selected_piece, values=list(PIECES_DOCS_MAPS.keys())
+        )
 
         self.key_words_label = ttk.Label(self, text="Palavras-chave:")
         self.key_words_entry = ttk.Entry(self, textvariable=self.selected_key_words)
@@ -45,7 +47,9 @@ class ParametersPage(ttk.Frame):
         self.button = ttk.Button(self, text="Confirmar", command=self.handle_submit)
         self.button.bind("<Return>", self.handle_submit)
 
-        self.error_label = ttk.Label(self, text="Error ao fazer login.", foreground="red")
+        self.error_label = ttk.Label(
+            self, text="Error ao fazer login.", foreground="red"
+        )
 
     def show(self):
         self.logo.pack(fill="y", pady=20)
@@ -97,7 +101,9 @@ class ParametersPage(ttk.Frame):
 
         self.loading_frame.pack(fill="both", expand=True)
 
-        is_key_words_valid, _ = query.run_tests(key_words, print_results=False, failure_tests=False)
+        is_key_words_valid, _ = query.run_tests(
+            key_words, print_results=False, failure_tests=False
+        )
         if not is_key_words_valid:
             self.loading_frame.pack_forget()
             self.error_label.config(text="Palavras-chave inválidas.")
@@ -106,8 +112,8 @@ class ParametersPage(ttk.Frame):
 
         key_words = key_words.replace("*", ".*").replace("OU", "|")
 
-        self.event_generate("<<ParametersSelected>>", data={
-            "locator": locator,
-            "piece": piece,
-            "key_words": key_words})
+        self.event_generate(
+            "<<ParametersSelected>>",
+            data={"locator": locator, "piece": piece, "key_words": key_words},
+        )
         self.destroy()

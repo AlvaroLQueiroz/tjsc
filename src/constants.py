@@ -14,8 +14,8 @@ DOWNLOADED_PATH = DATA_PATH / "downloaded"
 SECRET_PATH = DATA_PATH / "secret.json"
 STATE_PATH = DATA_PATH / "state.json"
 
-NAVIGATION_TIMEOUT = 8000 # millisec
-ACTION_TIMEOUT = 4000 # millisec
+NAVIGATION_TIMEOUT = 8000  # millisec
+ACTION_TIMEOUT = 4000  # millisec
 
 DOMAIN = "https://eproc2g.tjsc.jus.br"
 EPROC_PROFILE_SELECTOR = "eproc/externo_controlador.php?acao=entrar_sso"

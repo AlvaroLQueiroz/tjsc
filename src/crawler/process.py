@@ -12,9 +12,17 @@ from src.interface.loading import LoadingFrame
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-PROCESS_COUNTER_RE = re.compile(r"Lista de Processos por Localizador \((\d+) registros.*")
+PROCESS_COUNTER_RE = re.compile(
+    r"Lista de Processos por Localizador \((\d+) registros.*"
+)
 
-async def get_processes(page: Page, locator: str, loading_frame: LoadingFrame, set_processes: Callable[[dict], None]) -> None:
+
+async def get_processes(
+    page: Page,
+    locator: str,
+    loading_frame: LoadingFrame,
+    set_processes: Callable[[dict], None],
+) -> None:
     logger.info("Getting processes...")
     await page.get_by_role("button", name="Meus localizadores").click()
     await page.wait_for_load_state()
@@ -23,7 +31,9 @@ async def get_processes(page: Page, locator: str, loading_frame: LoadingFrame, s
     processes = {}
 
     table = page.get_by_role("table", name="Lista de Processos por Localizador")
-    num_processes = PROCESS_COUNTER_RE.match(await table.locator("caption").inner_text())
+    num_processes = PROCESS_COUNTER_RE.match(
+        await table.locator("caption").inner_text()
+    )
     num_processes = int(num_processes.group(1)) if num_processes else 0
     logger.info(f"Found {num_processes} processes.")
     loading_frame.set_maximum(num_processes)
@@ -51,8 +61,13 @@ def flatten_dict(d: dict[str, list[str]]) -> dict[str, str]:
     return {k: v[0] for k, v in d.items()}
 
 
-async def download_process_files(page: Page, processes: dict[str, dict[str, Any]], file_name_pattern: re.Pattern, set_processes: Callable[[dict[str, dict[str, Any]]], None], loading_frame: LoadingFrame) -> None:
-
+async def download_process_files(
+    page: Page,
+    processes: dict[str, dict[str, Any]],
+    file_name_pattern: re.Pattern,
+    set_processes: Callable[[dict[str, dict[str, Any]]], None],
+    loading_frame: LoadingFrame,
+) -> None:
     for process_number, process in processes.items():
         if "files" not in process:
             processes[process_number]["files"] = []
@@ -68,7 +83,9 @@ async def download_process_files(page: Page, processes: dict[str, dict[str, Any]
             file_link = await file_anchor.get_attribute("href")
             file_name = await file_anchor.inner_text() + f"_{file_index}"
             if not file_name_pattern.match(file_name):
-                logger.info(f"Skipping file {file_name} as it does not match the pattern.")
+                logger.info(
+                    f"Skipping file {file_name} as it does not match the pattern."
+                )
                 continue
             parsed_url = urlparse(file_link or "")
             url_params = flatten_dict(parse_qs(parsed_url.query))
@@ -78,7 +95,9 @@ async def download_process_files(page: Page, processes: dict[str, dict[str, Any]
 
             file_path = process_folder / file_name
             file_path = file_path.with_suffix(".pdf")
-            response = await page.request.get(f"{DOMAIN}{EPROC}{parsed_url.path}", params=url_params)
+            response = await page.request.get(
+                f"{DOMAIN}{EPROC}{parsed_url.path}", params=url_params
+            )
 
             if response.status != 200:
                 logger.error(f"Failed to download file: {file_path}")

@@ -53,7 +53,9 @@ class LoginPage(ttk.Frame):
         self.button.bind("<Return>", self.dispatch_login)
         self.button.pack(pady=5)
 
-        self.error_label = ttk.Label(self, text="Error ao fazer login.", foreground="red")
+        self.error_label = ttk.Label(
+            self, text="Error ao fazer login.", foreground="red"
+        )
 
     def check_login_status(self, *args):
         async_handler(is_logged_in)(self.page, self.status.set)
@@ -65,12 +67,7 @@ class LoginPage(ttk.Frame):
         password = self.password.get()
         otp_code = self.otp_code.get()
         async_handler(make_login)(
-            username,
-            password,
-            otp_code,
-            self.page,
-            self.context,
-            self.status.set
+            username, password, otp_code, self.page, self.context, self.status.set
         )
 
     def handle_status_change(self, *args):

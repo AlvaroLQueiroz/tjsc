@@ -4,6 +4,7 @@ DECOUPLE_PARENTHESES = re.compile(r"(\S*)(\(|\))(\S*)")
 WORD = re.compile(r"\w+", re.UNICODE)
 ALL = r"[\s\S]*"
 
+
 async def convert_pattern_to_regex(query_string: str) -> re.Pattern:
     rgx = r""
     query_string = DECOUPLE_PARENTHESES.sub(r"\1 \2 \3", query_string)
@@ -20,15 +21,15 @@ async def convert_pattern_to_regex(query_string: str) -> re.Pattern:
             token = "|"
 
         if (
-            not rgx.endswith((ALL, "|", "(")) and
-            not token.startswith(ALL) and
-            token != "|"
+            not rgx.endswith((ALL, "|", "("))
+            and not token.startswith(ALL)
+            and token != "|"
         ):
             rgx += ALL + token
         else:
             rgx += token
 
-    return re.compile(rgx, re.IGNORECASE|re.UNICODE|re.MULTILINE)
+    return re.compile(rgx, re.IGNORECASE | re.UNICODE | re.MULTILINE)
 
 
 async def find_pattern_in_text(text: str, pattern: str) -> bool:

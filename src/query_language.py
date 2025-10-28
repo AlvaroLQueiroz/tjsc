@@ -5,7 +5,7 @@ from pyparsing import (
     Group,
     Word,
     ZeroOrMore,
-    OneOrMore
+    OneOrMore,
 )
 
 connector = CaselessKeyword("E") | CaselessKeyword("OU")
@@ -15,12 +15,16 @@ group = Group("(" + expr + ")")
 multi_group = Forward()
 
 multi_group <<= (
-    "(" +
-        (expr ^ group ^ multi_group) + OneOrMore(connector + (group ^ multi_group) + ZeroOrMore(connector + (expr ^ group ^ multi_group)))
-        +
-    ")"
+    "("
+    + (expr ^ group ^ multi_group)
+    + OneOrMore(
+        connector
+        + (group ^ multi_group)
+        + ZeroOrMore(connector + (expr ^ group ^ multi_group))
+    )
+    + ")"
 )
 
-query = (
-    (expr ^ group ^ multi_group) + ZeroOrMore(connector + (expr ^group ^ multi_group))
+query = (expr ^ group ^ multi_group) + ZeroOrMore(
+    connector + (expr ^ group ^ multi_group)
 )

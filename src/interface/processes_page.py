@@ -40,28 +40,34 @@ class ProcessesPage(ttk.LabelFrame):
                 tags=("file_button",),
             )
 
-        self.tree.tag_bind('file_button', '<Double-Button-1>', self.handle_file_click)
-        self.tree.tag_bind('process_button', '<Double-Button-1>', async_handler(self.handle_process_click))
+        self.tree.tag_bind("file_button", "<Double-Button-1>", self.handle_file_click)
+        self.tree.tag_bind(
+            "process_button",
+            "<Double-Button-1>",
+            async_handler(self.handle_process_click),
+        )
         self.tree.pack(fill="both", expand=True)
 
-        self.restart_button = ttk.Button(self, text="Nova Consulta", command=self.restart_crawling)
+        self.restart_button = ttk.Button(
+            self, text="Nova Consulta", command=self.restart_crawling
+        )
         self.restart_button.pack(pady=10)
 
     def handle_file_click(self, event):
-        item = self.tree.identify('item', event.x, event.y)
+        item = self.tree.identify("item", event.x, event.y)
         file_name = self.tree.item(item, "text")
         process_number = self.tree.item(self.tree.parent(item), "text")
         if file_name:
             file_path = DOWNLOADED_PATH / process_number / file_name
-            if os.name == 'nt':
+            if os.name == "nt":
                 os.startfile(file_path)  # For Windows
-            elif os.name == 'posix':
+            elif os.name == "posix":
                 os.system(f'open "{file_path}"')  # For macOS
             else:
                 os.system(f'xdg-open "{file_path}"')  # For Linux
 
     async def handle_process_click(self, event):
-        item = self.tree.identify('item', event.x, event.y)
+        item = self.tree.identify("item", event.x, event.y)
         process_number = self.tree.item(item, "text")
         self.clipboard_clear()
         self.clipboard_append(process_number)

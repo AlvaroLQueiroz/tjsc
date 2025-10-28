@@ -1,8 +1,20 @@
 import tkinter as tk
 from async_tkinter_loop import async_handler
-from playwright.async_api import async_playwright, Playwright, Browser, BrowserContext, Page
+from playwright.async_api import (
+    async_playwright,
+    Playwright,
+    Browser,
+    BrowserContext,
+    Page,
+)
 
-from src.constants import ACTION_TIMEOUT, DOMAIN, STATE_PATH, NAVIGATION_TIMEOUT, ACTION_TIMEOUT
+from src.constants import (
+    ACTION_TIMEOUT,
+    DOMAIN,
+    STATE_PATH,
+    NAVIGATION_TIMEOUT,
+    ACTION_TIMEOUT,
+)
 
 from src.dto import DictVar
 from src.interface.crawler import CrawlerPage
@@ -54,7 +66,6 @@ async def start_navigator():
         **playwright.devices["Desktop Chrome"],
         base_url=DOMAIN,
         storage_state=STATE_PATH,
-
     )
     page = await context.new_page()
     page.set_default_navigation_timeout(NAVIGATION_TIMEOUT)

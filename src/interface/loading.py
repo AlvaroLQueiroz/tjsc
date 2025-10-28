@@ -9,7 +9,15 @@ LoadingMode = Literal["determinate", "indeterminate"]
 
 
 class LoadingFrame(ttk.Frame):
-    def __init__(self, parent, text: str, mode: LoadingMode = "indeterminate", maximum: int = 100, *args, **kwargs):
+    def __init__(
+        self,
+        parent,
+        text: str,
+        mode: LoadingMode = "indeterminate",
+        maximum: int = 100,
+        *args,
+        **kwargs,
+    ):
         super().__init__(parent, *args, **kwargs)
         self.mode = mode
 
@@ -19,7 +27,9 @@ class LoadingFrame(ttk.Frame):
         self.counter = tk.IntVar(value=0)
         self.percentage = tk.StringVar(value="0%")
 
-        self.loader = ttk.Progressbar(self, mode=self.mode, maximum=maximum, variable=self.counter)
+        self.loader = ttk.Progressbar(
+            self, mode=self.mode, maximum=maximum, variable=self.counter
+        )
         self.loader.pack(pady=20, padx=100, fill="x")
 
         self.label = ttk.Label(self, text=text)

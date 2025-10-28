@@ -4,7 +4,14 @@ from typing import Callable
 
 from playwright.async_api import BrowserContext, Page, TimeoutError
 
-from src.constants import EPROC_CONTROLADOR, EPROC_PROFILE, EPROC_PROFILE_SELECTOR, SECRET_PATH, STATE_PATH, EPROC_HOME
+from src.constants import (
+    EPROC_CONTROLADOR,
+    EPROC_PROFILE,
+    EPROC_PROFILE_SELECTOR,
+    SECRET_PATH,
+    STATE_PATH,
+    EPROC_HOME,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -67,13 +74,20 @@ async def is_logged_in(page: Page, set_user_status: Callable[[dict], None]) -> N
         await page.wait_for_url(f"**{EPROC_CONTROLADOR}**")
     except (TimeoutError, ValueError) as e:
         logger.warning("User not logged in: %s", e)
-        set_user_status({ "logged_in": False })
+        set_user_status({"logged_in": False})
         return
     logger.info("User is logged in")
-    set_user_status({ "logged_in": True })
+    set_user_status({"logged_in": True})
 
 
-async def make_login(username: str, password: str, otp_code: str, page: Page, context: BrowserContext, set_user_status: Callable[[dict], None]) -> None:
+async def make_login(
+    username: str,
+    password: str,
+    otp_code: str,
+    page: Page,
+    context: BrowserContext,
+    set_user_status: Callable[[dict], None],
+) -> None:
     logger.info("Logging in...")
 
     try:
@@ -84,11 +98,13 @@ async def make_login(username: str, password: str, otp_code: str, page: Page, co
     try:
         await fill_login_form(username, password, page)
     except TimeoutError:
-        set_user_status({ "logged_in": False, "message": "Erro ao carregar o formulário de login" })
+        set_user_status(
+            {"logged_in": False, "message": "Erro ao carregar o formulário de login"}
+        )
         return
     except ValueError:
         logger.error("Login failed")
-        set_user_status({ "logged_in": False, "message": "Usuário ou senha inválidos" })
+        set_user_status({"logged_in": False, "message": "Usuário ou senha inválidos"})
         return
 
     try:
@@ -106,11 +122,13 @@ async def make_login(username: str, password: str, otp_code: str, page: Page, co
             raise ValueError("Invalid OTP code")
     except TimeoutError as e:
         logger.error("OTP form not found: %s", e)
-        set_user_status({ "logged_in": False, "message": "Erro ao carregar o formulário 2FA" })
+        set_user_status(
+            {"logged_in": False, "message": "Erro ao carregar o formulário 2FA"}
+        )
         return
     except ValueError as e:
         logger.error("Invalid OTP code: %s", e)
-        set_user_status({ "logged_in": False, "message": "Código 2FA inválido" })
+        set_user_status({"logged_in": False, "message": "Código 2FA inválido"})
         return
 
     await context.storage_state(path=STATE_PATH)
@@ -121,10 +139,12 @@ async def make_login(username: str, password: str, otp_code: str, page: Page, co
         await page.wait_for_url(f"**{EPROC_CONTROLADOR}**")
     except TimeoutError as e:
         logger.error("Login failed: %s", e)
-        set_user_status({ "logged_in": False, "message": "Erro ao carregar a página inicial" })
+        set_user_status(
+            {"logged_in": False, "message": "Erro ao carregar a página inicial"}
+        )
         return
 
     logger.info("Logged in")
     await context.storage_state(path=STATE_PATH)
     logger.info("Storage state saved")
-    set_user_status({ "logged_in": True })
+    set_user_status({"logged_in": True})
