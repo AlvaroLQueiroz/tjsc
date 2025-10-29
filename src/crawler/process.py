@@ -3,13 +3,12 @@ import re
 from typing import Any, Callable
 from urllib.parse import urlparse, parse_qs
 
-from playwright.async_api import BrowserContext, Page, TimeoutError
+from playwright.async_api import Page, TimeoutError
 
 from src.constants import DOMAIN, DOWNLOADED_PATH, EPROC
 from src.interface.loading import LoadingFrame
 
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 PROCESS_COUNTER_RE = re.compile(
@@ -23,25 +22,29 @@ async def get_processes(
     loading_frame: LoadingFrame,
     set_processes: Callable[[dict], None],
 ) -> None:
-    logger.info("Getting processes...")
+    logger.debug("Getting processes...")
+    logger.debug("Going to Meus localizadores page.")
     await page.get_by_role("button", name="Meus localizadores").click()
     await page.wait_for_load_state()
+    logger.debug("Clicking on locator: %s", locator)
     await page.get_by_role("link", name=locator).click()
     await page.wait_for_load_state()
     processes = {}
 
+    logger.debug("Collecting processes from the table.")
     table = page.get_by_role("table", name="Lista de Processos por Localizador")
     num_processes = PROCESS_COUNTER_RE.match(
         await table.locator("caption").inner_text()
     )
     num_processes = int(num_processes.group(1)) if num_processes else 0
-    logger.info(f"Found {num_processes} processes.")
+    logger.info("Found %s processes", num_processes)
     loading_frame.set_maximum(num_processes)
 
     has_next_page = True
     while has_next_page:
         rows = await table.locator("tr:is(.infraTrClara,.infraTrEscura)").all()
-        for process in rows:
+        for index, process in enumerate(rows):
+            logger.debug("Collecting process %s", index)
             loading_frame.update_progress()
             process_number_col = process.locator("td").nth(1).locator("a").nth(0)
             text = await process_number_col.inner_text()
@@ -50,10 +53,11 @@ async def get_processes(
         try:
             await page.get_by_role("link", name="Próxima Página").nth(0).click()
             await page.wait_for_load_state()
+            logger.debug("Navigated to next page of processes.")
         except TimeoutError:
             has_next_page = False
 
-    logger.info(f"Total processes collected: {len(processes)}")
+    logger.info("Total processes collected: %s", len(processes))
     set_processes(processes)
 
 
@@ -68,7 +72,9 @@ async def download_process_files(
     set_processes: Callable[[dict[str, dict[str, Any]]], None],
     loading_frame: LoadingFrame,
 ) -> None:
+    logger.debug("Downloading process files...")
     for process_number, process in processes.items():
+        logger.debug("Downloading files for process: %s", process_number)
         if "files" not in process:
             processes[process_number]["files"] = []
         loading_frame.update_progress()
@@ -76,6 +82,7 @@ async def download_process_files(
 
         process_folder = DOWNLOADED_PATH / process_number.replace("/", "_")
         process_folder.mkdir(parents=True, exist_ok=True)
+        downloaded_files_counter = 0
 
         files_anchors = await page.locator(".infraLinkDocumento").all()
         logger.info(f"Found {len(files_anchors)} files for process {process_number}...")
@@ -83,10 +90,9 @@ async def download_process_files(
             file_link = await file_anchor.get_attribute("href")
             file_name = await file_anchor.inner_text() + f"_{file_index}"
             if not file_name_pattern.match(file_name):
-                logger.info(
-                    f"Skipping file {file_name} as it does not match the pattern."
-                )
+                logger.debug("Skipping file %s as it does not match the pattern.", file_name)
                 continue
+            logger.debug("Downloading file %s from %s", file_name, file_link)
             parsed_url = urlparse(file_link or "")
             url_params = flatten_dict(parse_qs(parsed_url.query))
             url_params["acao"] = "acessar_documento_implementacao"
@@ -100,12 +106,14 @@ async def download_process_files(
             )
 
             if response.status != 200:
-                logger.error(f"Failed to download file: {file_path}")
+                logger.error("Failed to download file: %s -- %s", file_path, await response.body())
                 continue
-
             with open(file_path, "wb") as f:
                 f.write(await response.body())
-            logger.info(f"Downloaded file: {file_path.with_suffix('.pdf')}")
+            downloaded_files_counter += 1
+            logger.debug("Downloaded file %s to %s", file_name, file_path)
             processes[process_number]["files"].append(str(file_path))
-
+        logger.info(
+            f"Downloaded {downloaded_files_counter} files for process {process_number}."
+        )
     set_processes(processes)

@@ -1,3 +1,5 @@
+import logging
+
 import tkinter as tk
 from async_tkinter_loop import async_handler
 from playwright.async_api import (
@@ -15,7 +17,6 @@ from src.constants import (
     NAVIGATION_TIMEOUT,
     ACTION_TIMEOUT,
 )
-
 from src.dto import DictVar
 from src.interface.crawler import CrawlerPage
 from src.interface.login import LoginPage
@@ -32,11 +33,13 @@ browser: Browser = None
 context: BrowserContext = None
 page: Page = None
 
+logger = logging.getLogger(__name__)
 
 def start_application():
     global is_navigator_ready
     global loading_frame
 
+    logger.debug("########## Starting application ##########")
     # Initial states
     is_navigator_ready = tk.BooleanVar(value=False)
 
@@ -53,12 +56,13 @@ async def start_navigator():
     global context
     global page
 
+    logger.debug("Starting Playwright navigator...")
     playwright = await async_playwright().start()
     browser = await playwright.webkit.launch(
-        args=[
-            f'--window-size="{rootWindow.width},{rootWindow.height}"',
-            f'--window-position="0,{rootWindow.height}"',
-        ],
+        # args=[
+        #     f'--window-size="{rootWindow.width},{rootWindow.height}"',
+        #     f'--window-position="0,{rootWindow.height}"',
+        # ],
         headless=False,
         # slow_mo=ACTION_TIMEOUT // 5
     )
@@ -71,6 +75,7 @@ async def start_navigator():
     page.set_default_navigation_timeout(NAVIGATION_TIMEOUT)
     page.set_default_timeout(ACTION_TIMEOUT)
     is_navigator_ready.set(True)
+    logger.debug("Playwright navigator started successfully.")
 
 
 async def stop_navigator():
@@ -97,8 +102,8 @@ def show_crawler_page(e):
     piece = e.widget.selected_piece.get()
     key_words = e.widget.selected_key_words.get()
     crawler_page = CrawlerPage(rootWindow, page, context, locator, piece, key_words)
-    crawler_page.pack(fill="both", expand=True)
     crawler_page.bind("<<CrawlingFinished>>", show_processes_page)
+    crawler_page.pack(fill="both", expand=True)
     async_handler(crawler_page.crawler_processes)()
 
 

@@ -20,7 +20,7 @@ class ProcessesPage(ttk.LabelFrame):
         self.tree = ttk.Treeview(self, columns=("col1"), show="tree", cursor="hand1")
 
         for process_number in DOWNLOADED_PATH.iterdir():
-            if process_number.is_dir():
+            if process_number.is_dir() and any(process_number.glob("*.pdf")):
                 self.tree.insert(
                     parent="",
                     index="end",

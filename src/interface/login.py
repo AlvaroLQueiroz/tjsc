@@ -1,3 +1,5 @@
+import logging
+
 import tkinter as tk
 from tkinter import ttk
 
@@ -10,9 +12,13 @@ from src.interface.loading import LoadingFrame
 from src.interface.logo import LogoTitle
 
 
+logger = logging.getLogger(__name__)
+
+
 class LoginPage(ttk.Frame):
     def __init__(self, parent, page, context):
         super().__init__(parent)
+        logger.debug("Initializing LoginPage UI components.")
         self.page: Page = page
         self.context: BrowserContext = context
 
@@ -26,8 +32,10 @@ class LoginPage(ttk.Frame):
         self.loading_frame = LoadingFrame(self, text="Validando sessão...")
         self.loading_frame.pack(fill="both", expand=True)
         self.check_login_status()
+        logger.debug("LoginPage initialized successfully.")
 
     def setup_ui(self):
+        logger.debug("Setting up LoginPage UI.")
         self.loading_frame.pack_forget()
 
         self.logo = LogoTitle(self)
@@ -56,11 +64,14 @@ class LoginPage(ttk.Frame):
         self.error_label = ttk.Label(
             self, text="Error ao fazer login.", foreground="red"
         )
+        logger.debug("LoginPage UI setup complete.")
 
     def check_login_status(self, *args):
+        logger.debug("Checking login status.")
         async_handler(is_logged_in)(self.page, self.status.set)
 
     def dispatch_login(self, event: tk.Event | None = None):
+        logger.debug("Dispatching login attempt.")
         self.error_label.pack_forget()
         self.loading_frame.pack(fill="both", expand=True)
         username = self.username.get()
@@ -71,6 +82,7 @@ class LoginPage(ttk.Frame):
         )
 
     def handle_status_change(self, *args):
+        logger.debug("Handling login status change.")
         status = self.status.get()
         if status.get("logged_in") is True:
             self.loading_frame.destroy()

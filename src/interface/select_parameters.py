@@ -1,3 +1,5 @@
+import logging
+
 import tkinter as tk
 from tkinter import ttk
 
@@ -12,11 +14,15 @@ from src.interface.logo import LogoTitle
 from src.query_language import query
 
 
+logger = logging.getLogger(__name__)
+
+
 class ParametersPage(ttk.Frame):
     PIECES_KEYS = list(PIECES_DOCS_MAPS.keys())
 
     def __init__(self, parent: tk.Tk, page: Page, context: BrowserContext):
         super().__init__(parent)
+        logger.debug("Initializing ParametersPage.")
         self.page = page
         self.context = context
 
@@ -28,8 +34,10 @@ class ParametersPage(ttk.Frame):
 
         self.build_ui()
         self.get_user_locators()
+        logger.debug("ParametersPage initialized successfully.")
 
     def build_ui(self):
+        logger.debug("Building UI for ParametersPage.")
         self.logo = LogoTitle(self)
         self.loading_frame = LoadingFrame(self, text="Carregando localizadores...")
 
@@ -50,6 +58,7 @@ class ParametersPage(ttk.Frame):
         self.error_label = ttk.Label(
             self, text="Error ao fazer login.", foreground="red"
         )
+        logger.debug("UI for ParametersPage built successfully.")
 
     def show(self):
         self.logo.pack(fill="y", pady=20)
@@ -70,18 +79,23 @@ class ParametersPage(ttk.Frame):
         self.error_label.pack_forget()
 
     def get_user_locators(self, *args):
+        logger.debug("Fetching user locators.")
         self.loading_frame.pack(fill="both", expand=True)
         async_handler(get_my_locators)(self.page, self.locators.set)
+        logger.debug("User locators fetched.")
 
     def on_locators_change(self, *args):
+        logger.debug("Handling locators change.")
         locators = self.locators.get()
         locator_names = list(locators.keys())
         self.selected_locator.set(locator_names[0] if locator_names else "")
         self.locator_combobox.config(values=locator_names)
         self.loading_frame.pack_forget()
         self.show()
+        logger.debug("Locators change handled.")
 
     def handle_submit(self, *args):
+        logger.debug("Handling parameters submission.")
         self.error_label.pack_forget()
         locator = self.selected_locator.get()
         piece = self.selected_piece.get()
@@ -89,14 +103,17 @@ class ParametersPage(ttk.Frame):
         if not locator:
             self.error_label.config(text="Por favor, selecione um localizador.")
             self.error_label.pack(pady=5)
+            logger.warning("No locator selected.")
             return
         elif not piece:
             self.error_label.config(text="Por favor, selecione um tipo de peça.")
             self.error_label.pack(pady=5)
+            logger.warning("No piece type selected.")
             return
         elif not key_words:
             self.error_label.config(text="Por favor, preencha todos os campos.")
             self.error_label.pack(pady=5)
+            logger.warning("No key words provided.")
             return
 
         self.loading_frame.pack(fill="both", expand=True)
@@ -108,9 +125,8 @@ class ParametersPage(ttk.Frame):
             self.loading_frame.pack_forget()
             self.error_label.config(text="Palavras-chave inválidas.")
             self.error_label.pack(pady=5)
+            logger.error("Invalid key words provided.")
             return
-
-        key_words = key_words.replace("*", ".*").replace("OU", "|")
 
         self.event_generate(
             "<<ParametersSelected>>",

@@ -9,11 +9,10 @@ import itertools
 from src.constants import CONVERTED_PATH
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
 
 
 def convert_pdf_to_images(pdf_path: Path) -> Path:
-    logging.info(f"Converting PDF to images: {pdf_path}")
+    logger.debug("Converting PDF to images...")
     folder_path = CONVERTED_PATH / pdf_path.parent.name / pdf_path.stem
     folder_path.mkdir(parents=True, exist_ok=True)
     convert_from_path(
@@ -23,11 +22,12 @@ def convert_pdf_to_images(pdf_path: Path) -> Path:
         output_folder=folder_path,
         output_file=pdf_path.stem,
     )
+    logger.debug("Images saved at: %s", folder_path)
     return folder_path
 
 
 async def extract_text_from_image(image_path: Path) -> list[str]:
-    logging.info(f"Extracting text from image: {image_path}")
+    logger.debug("Extracting text from image: %s", image_path)
     reader = easyocr.Reader(["pt"])
     raw = reader.readtext(image_path.as_posix(), output_format="dict")
     result = [block["text"] for block in raw]
@@ -42,9 +42,10 @@ async def extract_text_from_images(folder_path: Path) -> list[list[str]]:
 
 
 async def extract_text_from_pdf(pdf_path: Path) -> str:
+    logger.debug("Starting text extraction from PDF: %s", pdf_path)
     img_path = convert_pdf_to_images(pdf_path)
     files_text = await extract_text_from_images(img_path)
-    logging.info(f"Extracted text from PDF: {pdf_path} {len(files_text)} pages")
+    logger.debug("Extracted %d pages", len(files_text))
     return "\n".join(itertools.chain.from_iterable(files_text))
 
 
