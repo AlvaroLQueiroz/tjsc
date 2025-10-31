@@ -39,7 +39,7 @@ jobs:
         with:
           python-version: "3.14"
 
-      - uses: astral-sh/setup-uv@latest # Or the latest version
+      - uses: astral-sh/setup-uv # Or the latest version
         with:
           version: "latest" # Or a specific version like '0.1.0'
 
