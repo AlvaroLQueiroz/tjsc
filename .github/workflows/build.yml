@@ -1,0 +1,24 @@
+name: Build Windows Executable
+
+on:
+  push:
+    branches:
+      - main # Or your default branch
+
+jobs:
+  build-windows:
+    runs-on: ubuntu-latest # This action uses Wine to emulate Windows on Linux runners
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build with PyInstaller for Windows
+        uses: JackMcKew/pyinstaller-action-windows@v2 # Use the specific action version
+        with:
+          path: ./main.py # Path to your main Python script
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-executable
+          path: dist/ # PyInstaller output directory
