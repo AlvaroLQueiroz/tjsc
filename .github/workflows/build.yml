@@ -1,24 +1,58 @@
 name: Build Windows Executable
 
+# on:
+#   push:
+#     branches:
+#       - main # Or your default branch
+
+# jobs:
+#   build-windows:
+#     runs-on: ubuntu-latest # This action uses Wine to emulate Windows on Linux runners
+
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Build with PyInstaller for Windows
+#         uses: JackMcKew/pyinstaller-action-windows # Use the specific action version
+#         with:
+#           path: ./main.py # Path to your main Python script
+
+#       - name: Upload artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: windows-executable
+#           path: dist/ # PyInstaller output directory
+
 on:
   push:
     branches:
-      - main # Or your default branch
-
+      - main
 jobs:
-  build-windows:
-    runs-on: ubuntu-latest # This action uses Wine to emulate Windows on Linux runners
-
+  build:
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Build with PyInstaller for Windows
-        uses: JackMcKew/pyinstaller-action-windows # Use the specific action version
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          path: ./main.py # Path to your main Python script
+          python-version: "3.14"
+
+      - uses: astral-sh/setup-uv@v1 # Or the latest version
+        with:
+          uv-version: "latest" # Or a specific version like '0.1.0'
+
+      - name: Install dependencies
+        run: >
+          uv run playwright install chromium
+
+      - name: Package Application with PyInstaller
+        run: |
+          uv run pyinstaller main.py --onedir --name tjsc -w --collect-all=playwright
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows-executable
-          path: dist/ # PyInstaller output directory
+          name: TJSC.exe
+          path: dist/tjsc.exe
