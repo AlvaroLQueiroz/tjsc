@@ -11,4 +11,5 @@ data/converted/
 data/*secret*
 *.pdf
 *.xls*
-.env
+*.log
+.ruff_cache/

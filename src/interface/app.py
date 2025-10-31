@@ -1,5 +1,6 @@
 import logging
 
+import subprocess
 import tkinter as tk
 from async_tkinter_loop import async_handler
 from playwright.async_api import (
@@ -45,6 +46,7 @@ def start_application():
 
     # Event listeners
     is_navigator_ready.trace_add("write", show_login_page)
+    # rootWindow.protocol("WM_DELETE_WINDOW", async_handler(stop_navigator))
 
     # Starting point
     async_handler(start_navigator)()
@@ -58,14 +60,17 @@ async def start_navigator():
 
     logger.debug("Starting Playwright navigator...")
     playwright = await async_playwright().start()
-    browser = await playwright.webkit.launch(
-        # args=[
-        #     f'--window-size="{rootWindow.width},{rootWindow.height}"',
-        #     f'--window-position="0,{rootWindow.height}"',
-        # ],
-        headless=False,
-        # slow_mo=ACTION_TIMEOUT // 5
-    )
+
+    try:
+        browser = await playwright.webkit.launch(
+            headless=False,
+        )
+    except Exception as e:
+        logger.error(f"Failed to start Playwright: {e}")
+        subprocess.run(["playwright", "install", "chromium"], check=True)
+        browser = await playwright.webkit.launch(
+            headless=False,
+        )
     context = await browser.new_context(
         **playwright.devices["Desktop Chrome"],
         base_url=DOMAIN,
@@ -79,10 +84,13 @@ async def start_navigator():
 
 
 async def stop_navigator():
+    if not page:
+        return
     await page.close()
     await context.close()
     await browser.close()
     await playwright.stop()
+    rootWindow.destroy()
 
 
 def show_login_page(*args):
