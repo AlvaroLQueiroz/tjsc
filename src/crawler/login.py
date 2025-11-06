@@ -18,9 +18,14 @@ logger = logging.getLogger(__name__)
 
 def get_auth_data() -> tuple[str, str]:
     logger.debug("Loading authentication data...")
-    with open(SECRET_PATH) as f:
-        secrets = json.load(f)
-        logger.info("Authentication data loaded from secrets file.")
+    try:
+        with open(SECRET_PATH) as f:
+            secrets = json.load(f)
+            logger.info("Authentication data loaded from secrets file.")
+    except FileNotFoundError:
+        logger.warning("Secrets file not found")
+        return ("", "")
+        
     username = secrets.get("username")
     password = secrets.get("password")
     if not username or not password:

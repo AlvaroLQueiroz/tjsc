@@ -46,6 +46,8 @@ jobs:
       - name: Install dependencies
         run: >
           uv run playwright install chromium
+          $env:TCL_LIBRARY="$HOME\AppData\Roaming\uv\python\cpython-3.13.9-windows-x86_64-none\tcl\tcl8.6"
+          $env:TK_LIBRARY="$HOME\AppData\Roaming\uv\python\cpython-3.13.9-windows-x86_64-none\tcl\tk8.6"
 
       - name: Package Application with PyInstaller
         run: |
