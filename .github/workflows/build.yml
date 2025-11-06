@@ -44,7 +44,7 @@ jobs:
           version: "latest" # Or a specific version like '0.1.0'
 
       - name: Install dependencies
-        run: >
+        run: |
           uv run playwright install chromium
           $env:TCL_LIBRARY="$HOME\AppData\Roaming\uv\python\cpython-3.13.9-windows-x86_64-none\tcl\tcl8.6"
           $env:TK_LIBRARY="$HOME\AppData\Roaming\uv\python\cpython-3.13.9-windows-x86_64-none\tcl\tk8.6"
