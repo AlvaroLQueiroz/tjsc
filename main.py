@@ -10,6 +10,19 @@ from src.interface.app import start_application
 from src.interface.root import rootWindow
 
 
+from os import environ
+from pathlib import Path
+from sys import base_prefix
+import platform
+
+if not ("TCL_LIBRARY" in environ and "TK_LIBRARY" in environ):
+    tk_dir = "tcl" if platform.system() == "Windows" else "lib"
+    tk_path = Path(base_prefix) / tk_dir
+    print(tk_path)
+    environ["TCL_LIBRARY"] = str(next(tk_path.glob("tcl8.*")))
+    environ["TK_LIBRARY"] = str(next(tk_path.glob("tk8.*")))
+
+
 settings = dotenv_values(".env")
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(module)s:%(lineno)d - %(message)s'
 # Get the root logger
