@@ -67,7 +67,18 @@ async def start_navigator():
         )
     except Exception as e:
         logger.error(f"Failed to start Playwright: {e}")
-        subprocess.run(["playwright", "install"], check=True)
+        result = subprocess.run(
+            ["playwright", "install", "chromium"],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            logger.debug("Playwright Chromium installed successfully. Retrying launch...")
+        elif result.stderr:
+            logger.error(f"Playwright install error: {result.stderr}")
+        else:
+            logger.error("Playwright install failed for an unknown reason.")
         browser = await playwright.chromium.launch(
             headless=True,
         )
