@@ -17,6 +17,7 @@ from src.constants import (
     STATE_PATH,
     NAVIGATION_TIMEOUT,
     ACTION_TIMEOUT,
+    settings
 )
 from src.dto import DictVar
 from src.interface.crawler import CrawlerPage
@@ -63,10 +64,10 @@ async def start_navigator():
 
     try:
         browser = await playwright.chromium.launch(
-            headless=False,
+            headless=settings.get("headless", "true").lower() == "true",
         )
     except Exception as e:
-        logger.error(f"Failed to start Playwright: {e}")
+        logger.error(f"Failed to start Playwright")
         result = subprocess.run(
             ["playwright", "install", "chromium"],
             check=True,
@@ -80,7 +81,7 @@ async def start_navigator():
         else:
             logger.error("Playwright install failed for an unknown reason.")
         browser = await playwright.chromium.launch(
-            headless=True,
+            headless=settings.get("headless", "true").lower() == "true",
         )
     context = await browser.new_context(
         **playwright.devices["Desktop Chrome"],
