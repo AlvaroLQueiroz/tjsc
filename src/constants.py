@@ -1,8 +1,12 @@
 from pathlib import Path
 import re
 
-DATA_PATH = Path("data")
+from dotenv import dotenv_values
 
+
+settings = dotenv_values(".env")
+
+DATA_PATH = Path(settings.get("root_path", "_internal")) / "data"
 STATIC_PATH = DATA_PATH / "static"
 STATIC_PATH.mkdir(parents=True, exist_ok=True)
 

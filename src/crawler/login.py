@@ -7,7 +7,6 @@ from playwright.async_api import BrowserContext, Page, TimeoutError
 from src.constants import (
     EPROC_CONTROLADOR,
     EPROC_PROFILE,
-    EPROC_PROFILE_SELECTOR,
     SECRET_PATH,
     STATE_PATH,
     EPROC_HOME,
@@ -19,7 +18,7 @@ logger = logging.getLogger(__name__)
 def get_auth_data() -> tuple[str, str]:
     logger.debug("Loading authentication data...")
     try:
-        with open(SECRET_PATH) as f:
+        with open(SECRET_PATH, mode="w+") as f:
             secrets = json.load(f)
             logger.info("Authentication data loaded from secrets file.")
     except FileNotFoundError:

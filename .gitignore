@@ -8,7 +8,6 @@ wheels/
 .DS_Store
 .venv
 data/converted/
-data/*secret*
 *.pdf
 *.xls*
 *.log

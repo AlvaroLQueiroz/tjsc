@@ -62,13 +62,13 @@ async def start_navigator():
     playwright = await async_playwright().start()
 
     try:
-        browser = await playwright.webkit.launch(
+        browser = await playwright.chromium.launch(
             headless=False,
         )
     except Exception as e:
         logger.error(f"Failed to start Playwright: {e}")
-        subprocess.run(["playwright", "install", "chromium"], check=True)
-        browser = await playwright.webkit.launch(
+        subprocess.run(["playwright", "install"], check=True)
+        browser = await playwright.chromium.launch(
             headless=True,
         )
     context = await browser.new_context(

@@ -4,7 +4,6 @@ import logging
 import sys
 
 from async_tkinter_loop import async_mainloop
-from dotenv import dotenv_values
 
 from src.interface.app import start_application
 from src.interface.root import rootWindow
@@ -23,7 +22,7 @@ if not ("TCL_LIBRARY" in environ and "TK_LIBRARY" in environ):
     environ["TK_LIBRARY"] = str(next(tk_path.glob("tk8.*")))
 
 
-settings = dotenv_values(".env")
+
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(module)s:%(lineno)d - %(message)s'
 # Get the root logger
 root_logger = logging.getLogger()
