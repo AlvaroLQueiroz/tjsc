@@ -25,10 +25,12 @@ from src.interface.login import LoginPage
 from src.interface.processes_page import ProcessesPage
 from src.interface.select_parameters import ParametersPage
 from src.interface.root import rootWindow
+from src.interface.loading import LoadingFrame
 
 is_navigator_ready: tk.BooleanVar = None
 processes = DictVar()
 files = DictVar()
+loading_frame: LoadingFrame = None
 
 playwright: Playwright = None
 browser: Browser = None
@@ -45,6 +47,8 @@ def start_application():
     # Initial states
     is_navigator_ready = tk.BooleanVar(value=False)
 
+    loading_frame = LoadingFrame(rootWindow, text="Iniciando aplicação...")
+    loading_frame.pack(fill="both", expand=True)
     # Event listeners
     is_navigator_ready.trace_add("write", show_login_page)
     # rootWindow.protocol("WM_DELETE_WINDOW", async_handler(stop_navigator))
@@ -62,27 +66,13 @@ async def start_navigator():
     logger.debug("Starting Playwright navigator...")
     playwright = await async_playwright().start()
 
-    try:
-        browser = await playwright.chromium.launch(
-            headless=settings.get("headless", "true").lower() == "true",
-        )
-    except Exception as e:
-        logger.error(f"Failed to start Playwright")
-        result = subprocess.run(
-            ["playwright", "install", "chromium"],
-            check=True,
-            capture_output=True,
-            text=True
-        )
-        if result.returncode == 0:
-            logger.debug("Playwright Chromium installed successfully. Retrying launch...")
-        elif result.stderr:
-            logger.error(f"Playwright install error: {result.stderr}")
-        else:
-            logger.error("Playwright install failed for an unknown reason.")
-        browser = await playwright.chromium.launch(
-            headless=settings.get("headless", "true").lower() == "true",
-        )
+    subprocess.run(
+        ["playwright", "install", "chromium"],
+        check=True,
+    )
+    browser = await playwright.chromium.launch(
+        headless=settings.get("headless", "true").lower() == "true",
+    )
     context = await browser.new_context(
         **playwright.devices["Desktop Chrome"],
         base_url=DOMAIN,
@@ -106,6 +96,7 @@ async def stop_navigator():
 
 
 def show_login_page(*args):
+    loading_frame.destroy()
     login_frame = LoginPage(rootWindow, page, context)
     login_frame.bind("<<LoginSuccess>>", show_parameters_page)
     login_frame.pack(fill="both", expand=True)

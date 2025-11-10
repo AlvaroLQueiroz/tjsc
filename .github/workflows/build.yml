@@ -43,15 +43,16 @@ jobs:
         with:
           version: "latest" # Or a specific version like '0.1.0'
 
-      - name: Install dependencies
-        run: |
-          $env:PLAYWRIGHT_BROWSERS_PATH=0
-          uv run playwright install chromium
+      # - name: Install dependencies
+      #   run: |
+      #     $env:PLAYWRIGHT_BROWSERS_PATH=0
+      #     uv run playwright install chromium
           
 
       - name: Package Application with PyInstaller
         run: |
-          uv run pyinstaller main.py --onedir --name tjsc --collect-all=playwright -d all --add-data .\data\:.\data\
+          uv run pyinstaller main.py --onedir --name tjsc --add-data .\data\:.\data\
+          # uv run pyinstaller main.py --onedir --name tjsc --collect-all=playwright --add-data .\data\:.\data\
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
