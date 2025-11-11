@@ -1,6 +1,5 @@
 import logging
-
-import subprocess
+import asyncio
 import tkinter as tk
 from async_tkinter_loop import async_handler
 from playwright.async_api import (
@@ -66,10 +65,14 @@ async def start_navigator():
     logger.debug("Starting Playwright navigator...")
     playwright = await async_playwright().start()
 
-    subprocess.run(
-        ["playwright", "install", "chromium"],
-        check=True,
+    process = await asyncio.create_subprocess_shell(
+        "playwright install chromium",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
     )
+
+    await process.communicate()
+    
     browser = await playwright.chromium.launch(
         headless=settings.get("headless", "true").lower() == "true",
     )
@@ -86,12 +89,14 @@ async def start_navigator():
 
 
 async def stop_navigator():
-    if not page:
-        return
-    await page.close()
-    await context.close()
-    await browser.close()
-    await playwright.stop()
+    if page:
+        await page.close()
+    if context:
+        await context.close()
+    if browser:
+        await browser.close()
+    if playwright:
+        await playwright.stop()
     rootWindow.destroy()
 
 
