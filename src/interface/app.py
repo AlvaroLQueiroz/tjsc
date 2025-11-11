@@ -65,14 +65,20 @@ async def start_navigator():
     logger.debug("Starting Playwright navigator...")
     playwright = await async_playwright().start()
 
-    process = await asyncio.create_subprocess_shell(
-        "playwright install chromium",
+    # process = await asyncio.create_subprocess_shell(
+    #     "playwright install chromium",
+    #     stdout=asyncio.subprocess.PIPE,
+    #     stderr=asyncio.subprocess.PIPE
+    # )
+
+    # await process.wait()
+    proc = await asyncio.create_subprocess_exec(
+        'playwright', 'install', 'chromium',
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        stderr=asyncio.subprocess.STDOUT,
+        stdin=asyncio.subprocess.PIPE,
     )
 
-    await process.communicate()
-    
     browser = await playwright.chromium.launch(
         headless=settings.get("headless", "true").lower() == "true",
     )
