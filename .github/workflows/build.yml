@@ -39,7 +39,6 @@ jobs:
             --icon data\static\logo_eproc.png `
             --collect-all=playwright `
             --add-data .\data\:.\data\ `
-            --windowed `
             --hide-console hide-early
 
           # uv run pyinstaller main.py -y `
