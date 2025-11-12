@@ -24,7 +24,7 @@ def get_auth_data() -> tuple[str, str]:
     except FileNotFoundError:
         logger.warning("Secrets file not found")
         return ("", "")
-        
+
     username = secrets.get("username")
     password = secrets.get("password")
     if not username or not password:
@@ -97,7 +97,6 @@ async def make_login(
     context: BrowserContext,
     set_user_status: Callable[[dict], None],
 ) -> None:
-
     try:
         await page.goto(EPROC_HOME)
         logger.debug("Navigated to home page")

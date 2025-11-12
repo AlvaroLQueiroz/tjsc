@@ -6,7 +6,11 @@ from dotenv import dotenv_values
 
 settings = dotenv_values(".env")
 
-DATA_PATH = Path(settings.get("root_path", "_internal")) / "data"
+DATA_PATH = Path(".") / "data"
+
+LOG_PATH = DATA_PATH / "logs"
+LOG_PATH.mkdir(parents=True, exist_ok=True)
+
 STATIC_PATH = DATA_PATH / "static"
 STATIC_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -14,6 +18,7 @@ CONVERTED_PATH = DATA_PATH / "converted"
 CONVERTED_PATH.mkdir(parents=True, exist_ok=True)
 
 DOWNLOADED_PATH = DATA_PATH / "downloaded"
+DOWNLOADED_PATH.mkdir(parents=True, exist_ok=True)
 
 SECRET_PATH = DATA_PATH / "secret.json"
 STATE_PATH = DATA_PATH / "state.json"

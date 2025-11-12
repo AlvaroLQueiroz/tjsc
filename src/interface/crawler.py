@@ -30,7 +30,12 @@ class CrawlerPage(ttk.Frame):
         key_words: str,
     ):
         super().__init__(parent)
-        logger.debug("Initializing Crawler with locator: %s, piece: %s, key_words: %s.", locator, piece, key_words)
+        logger.debug(
+            "Initializing Crawler with locator: %s, piece: %s, key_words: %s.",
+            locator,
+            piece,
+            key_words,
+        )
         self.page = page
         self.context = context
         self.locator = locator
@@ -57,10 +62,10 @@ class CrawlerPage(ttk.Frame):
         self.loading_frame.reset_progress()
         self.loading_frame.pack(fill="both", expand=True)
         if self.process_downloaded_files_trace_id:
-            self.processes.trace_remove(
-                "write", self.process_downloaded_files_trace_id
-            )
-        self.download_files_trace_id = self.processes.trace_add("write", async_handler(self.download_files))
+            self.processes.trace_remove("write", self.process_downloaded_files_trace_id)
+        self.download_files_trace_id = self.processes.trace_add(
+            "write", async_handler(self.download_files)
+        )
         await get_processes(
             self.page, self.locator, self.loading_frame, self.processes.set
         )
@@ -69,7 +74,9 @@ class CrawlerPage(ttk.Frame):
         self.loading_frame.set_text("Baixando arquivos dos processos...")
         self.loading_frame.reset_progress()
         self.processes.trace_remove("write", self.download_files_trace_id)
-        self.process_downloaded_files_trace_id = self.processes.trace_add("write", async_handler(self.process_downloaded_files))
+        self.process_downloaded_files_trace_id = self.processes.trace_add(
+            "write", async_handler(self.process_downloaded_files)
+        )
         await download_process_files(
             self.page,
             self.processes.get(),

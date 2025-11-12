@@ -1,28 +1,5 @@
 name: Build Windows Executable
 
-# on:
-#   push:
-#     branches:
-#       - main # Or your default branch
-
-# jobs:
-#   build-windows:
-#     runs-on: ubuntu-latest # This action uses Wine to emulate Windows on Linux runners
-
-#     steps:
-#       - uses: actions/checkout@v4
-
-#       - name: Build with PyInstaller for Windows
-#         uses: JackMcKew/pyinstaller-action-windows # Use the specific action version
-#         with:
-#           path: ./main.py # Path to your main Python script
-
-#       - name: Upload artifact
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: windows-executable
-#           path: dist/ # PyInstaller output directory
-
 on:
   push:
     branches:
@@ -39,20 +16,38 @@ jobs:
         with:
           python-version: "3.13"
 
-      - uses: astral-sh/setup-uv@v7 # Or the latest version
+      - uses: astral-sh/setup-uv@v7
         with:
-          version: "latest" # Or a specific version like '0.1.0'
+          version: "latest" 
 
-      # - name: Install dependencies
-      #   run: |
-      #     $env:PLAYWRIGHT_BROWSERS_PATH=0
-      #     uv run playwright install chromium
+      - name: Install dependencies
+        run: |
+          $env:PLAYWRIGHT_BROWSERS_PATH=0
+          uv run playwright install chromium
           
 
       - name: Package Application with PyInstaller
         run: |
-          uv run pyinstaller main.py --onedir --name tjsc --add-data .\data\:.\data\
-          # uv run pyinstaller main.py --onedir --name tjsc --collect-all=playwright --add-data .\data\:.\data\
+          # uv run pyinstaller main.py --onedir --name tjsc --add-data .\data\:.\data\
+          uv run pyinstaller main.py -y `
+            --onedir `
+            --name tjsc `
+            --contents-directory . `
+            --icon data\static\logo_eproc.png `
+            --collect-all=playwright `
+            --add-data .\data\:.\data\ `
+            --windowed `
+            --hide-console hide-early
+
+          # uv run pyinstaller main.py -y `
+          #   --onedir `
+          #   --name tjsc `
+          #   --contents-directory . `
+          #   --icon .\data\static\logo_eproc.png `
+          #   --collect-all=playwright `
+          #   --add-data .\data\:.\data\ `
+          #   --console `
+          #   --debug all
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

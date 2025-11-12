@@ -16,7 +16,7 @@ from src.constants import (
     STATE_PATH,
     NAVIGATION_TIMEOUT,
     ACTION_TIMEOUT,
-    settings
+    settings,
 )
 from src.dto import DictVar
 from src.interface.crawler import CrawlerPage
@@ -37,6 +37,7 @@ context: BrowserContext = None
 page: Page = None
 
 logger = logging.getLogger(__name__)
+
 
 def start_application():
     global is_navigator_ready
@@ -72,12 +73,12 @@ async def start_navigator():
     # )
 
     # await process.wait()
-    proc = await asyncio.create_subprocess_exec(
-        'playwright', 'install', 'chromium',
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-        stdin=asyncio.subprocess.PIPE,
-    )
+    # proc = await asyncio.create_subprocess_exec(
+    #     'playwright', 'install', 'chromium',
+    #     stdout=asyncio.subprocess.PIPE,
+    #     stderr=asyncio.subprocess.STDOUT,
+    #     stdin=asyncio.subprocess.PIPE,
+    # )
 
     browser = await playwright.chromium.launch(
         headless=settings.get("headless", "true").lower() == "true",

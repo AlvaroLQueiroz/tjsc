@@ -90,7 +90,9 @@ async def download_process_files(
             file_link = await file_anchor.get_attribute("href")
             file_name = await file_anchor.inner_text() + f"_{file_index}"
             if not file_name_pattern.match(file_name):
-                logger.debug("Skipping file %s as it does not match the pattern.", file_name)
+                logger.debug(
+                    "Skipping file %s as it does not match the pattern.", file_name
+                )
                 continue
             logger.debug("Downloading file %s from %s", file_name, file_link)
             parsed_url = urlparse(file_link or "")
@@ -106,7 +108,11 @@ async def download_process_files(
             )
 
             if response.status != 200:
-                logger.error("Failed to download file: %s -- %s", file_path, await response.body())
+                logger.error(
+                    "Failed to download file: %s -- %s",
+                    file_path,
+                    await response.body(),
+                )
                 continue
             with open(file_path, "wb") as f:
                 f.write(await response.body())
