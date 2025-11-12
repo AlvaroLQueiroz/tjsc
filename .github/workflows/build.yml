@@ -35,10 +35,12 @@ jobs:
           uv run pyinstaller main.py -y `
             --onedir `
             --name tjsc `
+            --paths C:\Windows\System32\downlevel `
             --contents-directory . `
             --icon data\static\logo_eproc.png `
             --collect-all=playwright `
             --add-data .\data\:.\data\ `
+            --windowed `
             --hide-console hide-early
 
           # uv run pyinstaller main.py -y `
