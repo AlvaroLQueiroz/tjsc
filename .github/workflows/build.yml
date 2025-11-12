@@ -18,8 +18,11 @@ jobs:
 
       - uses: astral-sh/setup-uv@v7
         with:
-          version: "latest" 
-
+          version: "latest"
+          enable-cache: "false"
+          restore-cache: "false"
+          save-cache: "false"
+      
       - name: Install dependencies
         run: |
           $env:PLAYWRIGHT_BROWSERS_PATH=0
